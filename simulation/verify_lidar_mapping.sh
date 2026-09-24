@@ -8,12 +8,10 @@ echo "===================================================================="
 echo " SIH26177 LIVE GAZEBO + LIDAR PROCESSING + 3D MAPPING VERIFICATION"
 echo "===================================================================="
 
-echo "[1/6] Launching sim_lidar_mapping stack in background..."
-ros2 launch sih_simulation sim_lidar_mapping.launch.py gui:=false > /tmp/sim_lidar_mapping.log 2>&1 &
-SIM_PID=$!
-
 cleanup() {
     echo "Terminating test processes..."
+    kill -SIGTERM $MAP_PID 2>/dev/null || true
+    kill -SIGTERM $LIDAR_PID 2>/dev/null || true
     kill -SIGTERM $SIM_PID 2>/dev/null || true
     pkill -f "ros_gz_bridge" 2>/dev/null || true
     pkill -f "lidar_processor_node" 2>/dev/null || true
@@ -22,8 +20,20 @@ cleanup() {
 }
 trap cleanup EXIT
 
-echo "Waiting for Gazebo, UAV spawn, ros_gz_bridge, lidar_node, and mapping_node to initialize..."
-sleep 8
+echo "[1/4] Launching Gazebo Fortress simulation stack..."
+ros2 launch sih_simulation simulation.launch.py gui:=false > /tmp/sim_launch.log 2>&1 &
+SIM_PID=$!
+sleep 6
+
+echo "[2/4] Launching live LiDAR processor..."
+ros2 launch sih_lidar lidar.launch.py > /tmp/lidar_launch.log 2>&1 &
+LIDAR_PID=$!
+sleep 2
+
+echo "[3/4] Launching live 3D mapping node..."
+ros2 launch sih_mapping mapping.launch.py > /tmp/mapping_launch.log 2>&1 &
+MAP_PID=$!
+sleep 3
 
 echo ""
 echo "===================================================================="
@@ -39,50 +49,49 @@ ros2 topic list
 
 echo ""
 echo "===================================================================="
-echo "CHECK 3: RAW GAZEBO LIDAR TOPIC INFO (/lidar/points)"
+echo "CHECK 3: RAW GAZEBO LIDAR TOPIC (/lidar/points)"
 echo "===================================================================="
 ros2 topic info /lidar/points
+ros2 topic echo /lidar/points --once --field header
+ros2 topic echo /lidar/points --once --field width
 
 echo ""
 echo "===================================================================="
 echo "CHECK 4: LIVE PROCESSED LIDAR OUTPUT (/lidar/processed_points)"
 echo "===================================================================="
-ros2 topic echo /lidar/processed_points --once
+ros2 topic echo /lidar/processed_points --once --field header
+ros2 topic echo /lidar/processed_points --once --field width
 
 echo ""
 echo "===================================================================="
-echo "CHECK 5: INITIAL 3D GLOBAL MAP STATE (/map/info & /map/pointcloud)"
+echo "CHECK 5: LIVE 3D MAP OUTPUT (/map/info & /map/pointcloud)"
 echo "===================================================================="
-echo "Map Info (initial):"
+echo "Initial Map Info:"
 ros2 topic echo /map/info --once
-echo "Map PointCloud header (initial):"
+echo "Initial Map PointCloud:"
 ros2 topic echo /map/pointcloud --once --field header
 ros2 topic echo /map/pointcloud --once --field width
 
 echo ""
 echo "===================================================================="
-echo "CHECK 6: DYNAMIC MAP ACCUMULATION UNDER UAV MOVEMENT"
+echo "CHECK 6: DYNAMIC MAP UPDATE WITH UAV MOVEMENT (/drone/cmd_vel)"
 echo "===================================================================="
 echo "Initial UAV Pose:"
 ros2 topic echo /drone/pose --once
 
-echo "Publishing velocity commands to move UAV..."
-for i in {1..12}; do
+echo "Publishing velocity command: linear.x = 2.0 m/s..."
+for i in {1..10}; do
     ros2 topic pub --once /drone/cmd_vel geometry_msgs/msg/Twist "{linear: {x: 2.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" > /dev/null 2>&1
     sleep 0.1
 done
 
 sleep 3
 
-echo "Updated UAV Pose:"
+echo "Updated UAV Pose after movement:"
 ros2 topic echo /drone/pose --once
 
 echo "Updated Map Info after movement:"
 ros2 topic echo /map/info --once
-
-echo "Updated Map PointCloud header after movement:"
-ros2 topic echo /map/pointcloud --once --field header
-ros2 topic echo /map/pointcloud --once --field width
 
 echo ""
 echo "===================================================================="

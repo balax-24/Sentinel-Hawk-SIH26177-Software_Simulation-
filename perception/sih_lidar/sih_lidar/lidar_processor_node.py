@@ -16,6 +16,7 @@ logger = logging.getLogger("SIH_LiDAR")
 try:
     import rclpy
     from rclpy.node import Node
+    from rclpy.qos import qos_profile_sensor_data
     from sensor_msgs.msg import PointCloud2, PointField
     from geometry_msgs.msg import Point, Vector3
     from std_msgs.msg import Header
@@ -27,6 +28,7 @@ except ImportError:
     PointCloud2 = Any
     Header = Any
     pc2 = None
+    qos_profile_sensor_data = None
 
 try:
     from sih_interfaces.msg import Obstacle, ObstacleArray
@@ -135,7 +137,7 @@ class LidarProcessorNode(Node if HAS_ROS2 else object):
 
             self.declare_parameter("min_range", 0.5)
             self.declare_parameter("max_range", 40.0)
-            self.declare_parameter("ground_threshold_z", 0.25)
+            self.declare_parameter("ground_threshold_z", -0.5)
             self.declare_parameter("voxel_size", 0.1)
 
             min_range = float(self.get_parameter("min_range").value)
@@ -151,7 +153,7 @@ class LidarProcessorNode(Node if HAS_ROS2 else object):
             )
 
             self.sub_points = self.create_subscription(
-                PointCloud2, "/lidar/points", self._points_callback, 10
+                PointCloud2, "/lidar/points", self._points_callback, qos_profile_sensor_data
             )
 
             # Primary output topic
@@ -209,10 +211,10 @@ class LidarProcessorNode(Node if HAS_ROS2 else object):
         header.frame_id = msg.header.frame_id
 
         # 5. Publish processed points (/lidar/processed_points & /lidar/filtered_points)
-        if len(obstacle_pts) > 0:
-            proc_msg = pc2.create_cloud_xyz32(header, obstacle_pts)
-            self.pub_processed_points.publish(proc_msg)
-            self.pub_filtered_points.publish(proc_msg)
+        output_pts = obstacle_pts if len(obstacle_pts) > 0 else pts
+        proc_msg = pc2.create_cloud_xyz32(header, output_pts)
+        self.pub_processed_points.publish(proc_msg)
+        self.pub_filtered_points.publish(proc_msg)
 
         # 6. Publish ground returns (/lidar/ground_points)
         if len(ground_pts) > 0:

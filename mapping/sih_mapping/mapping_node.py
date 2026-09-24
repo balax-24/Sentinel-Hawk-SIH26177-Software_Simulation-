@@ -23,6 +23,7 @@ logger = logging.getLogger("SIH_Mapping")
 try:
     import rclpy
     from rclpy.node import Node
+    from rclpy.qos import qos_profile_sensor_data
     from sensor_msgs.msg import PointCloud2
     from geometry_msgs.msg import PoseStamped
     from std_msgs.msg import Header, String
@@ -36,6 +37,7 @@ except ImportError:
     Header = Any
     String = Any
     pc2 = None
+    qos_profile_sensor_data = None
 
 
 class GlobalMapAccumulator:
@@ -168,10 +170,10 @@ class MappingNode(Node if HAS_ROS2 else object):
 
             # Subscriptions
             self.sub_points = self.create_subscription(
-                PointCloud2, "/lidar/processed_points", self._points_callback, 10
+                PointCloud2, "/lidar/processed_points", self._points_callback, qos_profile_sensor_data
             )
             self.sub_pose = self.create_subscription(
-                PoseStamped, "/drone/pose", self._pose_callback, 10
+                PoseStamped, "/drone/pose", self._pose_callback, qos_profile_sensor_data
             )
 
             # Publishers
