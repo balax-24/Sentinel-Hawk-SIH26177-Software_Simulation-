@@ -1,0 +1,18 @@
+sih_perception:
+  ros__parameters:
+    camera:
+      topic: "/camera/image"
+      depth_topic: "/camera/depth"
+      fov_deg: 62.2
+
+    optical_depth:
+      model_type: "midas_small"
+      model_path: "models/model-small.onnx"
+      min_depth_m: 0.2
+      max_depth_m: 20.0
+      voxel_size_m: 0.05
+
+    survivor_detection:
+      confidence_threshold: 0.60
+      min_contour_area_px: 150
+      auto_geo_tag: true

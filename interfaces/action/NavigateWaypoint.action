@@ -1,0 +1,18 @@
+# NavigateWaypoint.action
+# Action for high-level waypoint trajectory navigation
+
+geometry_msgs/PoseStamped target_pose
+float32 desired_speed_mps     # Speed in m/s (e.g., 2.0 - 5.0)
+float32 acceptance_radius_m   # Radius within target to consider reached (e.g., 0.5m)
+bool enable_obstacle_avoidance
+---
+bool success
+string result_code            # "REACHED", "OBSTACLE_BLOCKED", "BATTERY_ABORT", "CANCELLED"
+geometry_msgs/PoseStamped final_pose
+float32 total_flight_time_sec
+---
+# Feedback
+geometry_msgs/PoseStamped current_pose
+float32 distance_remaining_m
+float32 estimated_time_remaining_sec
+string current_sub_behavior   # "CRUISING", "SLOWING_DOWN", "AVOIDING_OBSTACLE", "ALIGNING"

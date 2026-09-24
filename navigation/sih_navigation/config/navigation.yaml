@@ -1,0 +1,12 @@
+sih_navigation:
+  ros__parameters:
+    planner:
+      altitude_m: 3.5
+      lane_spacing_m: 3.0
+      search_bounds: [-2.0, 10.0, 0.0, 10.0]
+
+    obstacle_avoidance:
+      safety_radius_m: 2.0
+      repulsion_gain: 1.5
+      max_speed_mps: 3.0
+      emergency_stop_dist_m: 0.6

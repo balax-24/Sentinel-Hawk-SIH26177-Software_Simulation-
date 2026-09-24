@@ -1,0 +1,9 @@
+sih_lidar_node:
+  ros__parameters:
+    input_topic: "/lidar/points"
+    output_filtered_topic: "/lidar/filtered_points"
+    output_obstacles_topic: "/obstacles"
+    min_range_m: 0.5
+    max_range_m: 40.0
+    ground_threshold_z_m: 0.25
+    voxel_size_m: 0.1

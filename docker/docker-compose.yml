@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  # Master mission simulator (Headless Gazebo + UAV + Full Stack)
+  sih-simulation:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.ros2
+    container_name: sih_full_mission
+    network_mode: host
+    environment:
+      - ROS_DOMAIN_ID=42
+      - HEADLESS=1
+    volumes:
+      - ../data/output:/ros2_ws/data/output
+    command: ros2 launch sih_system full_mission.launch.py gui:=false
+
+  # Standalone Operator Dashboard
+  sih-dashboard:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.ros2
+    container_name: sih_dashboard
+    network_mode: host
+    environment:
+      - ROS_DOMAIN_ID=42
+    command: ros2 launch sih_dashboard dashboard.launch.py

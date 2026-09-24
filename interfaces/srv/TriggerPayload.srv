@@ -1,0 +1,9 @@
+# TriggerPayload.srv
+# Service request to trigger payload release mechanism
+
+string bay_id                 # Which payload bay to trigger ("bay_1", "bay_2", or "ALL")
+bool confirm_target_clear     # Safety interlock: confirm no survivors directly under impact point
+---
+bool success                  # True if payload release sequence executed
+string status_message         # Diagnostic feedback
+builtin_interfaces/Time release_time

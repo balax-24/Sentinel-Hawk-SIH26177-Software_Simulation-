@@ -1,0 +1,7 @@
+sih_mission:
+  ros__parameters:
+    takeoff_altitude_m: 3.5
+    auto_rtl_battery_threshold: 20.0
+    payload:
+      auto_arm_on_survivor: true
+      confirmation_dwell_time_sec: 2.0

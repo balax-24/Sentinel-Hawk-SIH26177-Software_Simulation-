@@ -1,0 +1,17 @@
+# Global SIH26177 Mission Configuration
+
+mission:
+  id: "SIH26177_DISASTER_RESCUE_01"
+  search_zone_bounds: [-10.0, 20.0, -10.0, 20.0]
+  origin_gps:
+    latitude: 28.613939
+    longitude: 77.209021
+    altitude: 216.0
+  operating_altitude_m: 3.5
+  survey_speed_mps: 2.5
+  battery_failsafe_percentage: 20.0
+
+safety:
+  obstacle_clearance_m: 1.5
+  max_wind_speed_mps: 12.0
+  geofence_enabled: true

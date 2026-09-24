@@ -1,0 +1,51 @@
+# SIH Search and Rescue 3D Reconstruction Pipeline Configuration
+
+# Technical Note:
+# This system performs Monocular Depth Estimation followed by 3D Point-Cloud Reconstruction.
+# It does NOT claim to produce real hardware LiDAR data.
+
+model:
+  type: "midas_small"  # Supported: "midas_small", "dummy"
+  path: "models/model-small.onnx"
+  download_url: "https://github.com/isl-org/MiDaS/releases/download/v2_1/model-small.onnx"
+  input_width: 256
+  input_height: 256
+  # MiDaS outputs disparity (inverse relative depth: closer objects have higher values)
+  # When invert_depth is true, disparity is converted to pseudo-depth (closer objects have smaller Z)
+  invert_depth: true
+  min_depth: 0.1
+  max_depth: 10.0
+
+camera:
+  # Camera intrinsics can be calculated from horizontal FOV or set explicitly.
+  # 62.2 degrees is typical for Raspberry Pi Camera Module 2 (horizontal FOV).
+  fov_x_deg: 62.2
+  fx: null  # Pixels. If null, fx = (width / 2.0) / tan(fov_x / 2)
+  fy: null  # Pixels. If null, fy = fx
+  cx: null  # Pixels. If null, cx = width / 2.0
+  cy: null  # Pixels. If null, cy = height / 2.0
+
+pointcloud:
+  # Voxel downsampling grid size in meters (e.g. 0.002 for ~60k points, or null/0 to keep full 1M+ pixel resolution)
+  voxel_size: 0.002
+  # Statistical outlier removal to eliminate depth edge noise
+  remove_outliers: true
+  nb_neighbors: 20
+  std_ratio: 2.0
+  # Discard points further than max depth
+  depth_trunc: 10.0
+
+io:
+  default_input: "data/input/image.jpg"
+  output_dir: "data/output"
+  save_original: true
+  save_depth_colormap: true
+  save_depth_raw: true
+  save_pointcloud: true
+  colormap: "inferno"  # Options: "inferno", "turbo", "viridis", "magma"
+
+visualization:
+  enabled: true
+  headless: false
+  point_size: 2.0
+  background_color: [0.05, 0.05, 0.05]

@@ -1,0 +1,51 @@
+# Dockerfile for SIH26177 Search-and-Rescue ROS 2 System
+# Base image supports ROS 2 Humble + Gazebo on x86_64 and arm64 (Raspberry Pi 4)
+
+FROM osrf/ros:humble-desktop-full
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV ROS_DISTRO=humble
+ENV HEADLESS=1
+
+# Install essential build and runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3-pip \
+    python3-colcon-common-extensions \
+    python3-rosdep \
+    ros-humble-gazebo-ros-pkgs \
+    ros-humble-nav-msgs \
+    ros-humble-sensor-msgs \
+    ros-humble-geometry-msgs \
+    ros-humble-visualization-msgs \
+    libgl1 \
+    libglib2.0-0 \
+    wget \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /ros2_ws/src
+
+# Copy all project packages
+COPY . /ros2_ws/src/sih26177/
+
+# Install Python requirements for AI inference and point-cloud processing
+RUN pip3 install --no-cache-dir \
+    numpy \
+    opencv-python-headless \
+    onnxruntime \
+    open3d \
+    pyyaml \
+    pytest
+
+WORKDIR /ros2_ws
+
+# Build the ROS 2 workspace
+RUN . /opt/ros/${ROS_DISTRO}/setup.sh && \
+    colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
+
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["ros2", "launch", "sih_system", "full_mission.launch.py", "gui:=false"]

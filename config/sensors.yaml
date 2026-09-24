@@ -1,0 +1,29 @@
+# Global Sensor Calibration & Configuration
+
+lidar:
+  model: "3D_16CH_SOLID_STATE"
+  topic: "/lidar/points"
+  frame_id: "lidar_link"
+  frequency_hz: 10.0
+  min_range_m: 0.5
+  max_range_m: 40.0
+  voxel_size_m: 0.1
+
+camera:
+  model: "RPi_CAMERA_MODULE_V2"
+  topic: "/camera/image"
+  depth_topic: "/camera/depth"
+  frame_id: "camera_optical_link"
+  resolution: [1280, 720]
+  fov_horizontal_deg: 62.2
+  fps: 30.0
+
+gps:
+  topic: "/drone/gps/fix"
+  frame_id: "gps_link"
+  frequency_hz: 5.0
+
+imu:
+  topic: "/drone/imu/data"
+  frame_id: "imu_link"
+  frequency_hz: 100.0

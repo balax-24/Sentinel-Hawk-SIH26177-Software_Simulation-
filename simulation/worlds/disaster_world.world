@@ -1,0 +1,310 @@
+<?xml version="1.0" ?>
+<!-- SIH26177 Search-and-Rescue Disaster Scenario World for Gazebo Fortress -->
+<sdf version="1.8">
+  <world name="disaster_world">
+    <!-- Physics parameters -->
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.002</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <!-- Required Gazebo Fortress Core Systems -->
+    <plugin
+      filename="ignition-gazebo-physics-system"
+      name="ignition::gazebo::systems::Physics">
+    </plugin>
+    <plugin
+      filename="ignition-gazebo-user-commands-system"
+      name="ignition::gazebo::systems::UserCommands">
+    </plugin>
+    <plugin
+      filename="ignition-gazebo-scene-broadcaster-system"
+      name="ignition::gazebo::systems::SceneBroadcaster">
+    </plugin>
+    <plugin
+      filename="ignition-gazebo-sensors-system"
+      name="ignition::gazebo::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <plugin
+      filename="ignition-gazebo-imu-system"
+      name="ignition::gazebo::systems::Imu">
+    </plugin>
+    <plugin
+      filename="ignition-gazebo-navsat-system"
+      name="ignition::gazebo::systems::NavSat">
+    </plugin>
+
+    <!-- Global GPS Coordinates (Disaster Base Station) -->
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <world_frame_orientation>ENU</world_frame_orientation>
+      <latitude_deg>28.613939</latitude_deg>
+      <longitude_deg>77.209021</longitude_deg>
+      <elevation>219.0</elevation>
+      <heading_deg>0</heading_deg>
+    </spherical_coordinates>
+
+    <!-- Self-Contained Sun Directional Light -->
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 20 0 0 0</pose>
+      <diffuse>0.85 0.85 0.85 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.5 0.2 -0.85</direction>
+    </light>
+
+    <!-- Self-Contained Ground Plane with Disaster Terrain Texture -->
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="ground_link">
+        <collision name="ground_collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+        </collision>
+        <visual name="ground_visual">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.45 0.45 0.47 1</ambient>
+            <diffuse>0.45 0.45 0.47 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Disaster Scene Structural Collapse 1: Collapsed Concrete Slabs -->
+    <model name="collapsed_building_rubble_1">
+      <static>true</static>
+      <pose>5.0 5.0 0.4 0 0.25 0.5</pose>
+      <link name="slab_link_1">
+        <collision name="slab_col_1">
+          <geometry>
+            <box>
+              <size>6.0 4.0 0.35</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="slab_vis_1">
+          <geometry>
+            <box>
+              <size>6.0 4.0 0.35</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.6 0.6 0.62 1</ambient>
+            <diffuse>0.6 0.6 0.62 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Secondary Inclined Concrete Slab -->
+    <model name="collapsed_slab_inclined">
+      <static>true</static>
+      <pose>6.5 4.0 1.2 0.35 -0.15 0.8</pose>
+      <link name="slab_link_2">
+        <collision name="slab_col_2">
+          <geometry>
+            <box>
+              <size>4.5 3.0 0.3</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="slab_vis_2">
+          <geometry>
+            <box>
+              <size>4.5 3.0 0.3</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.55 0.52 0.50 1</ambient>
+            <diffuse>0.55 0.52 0.50 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Masonry Debris Mound -->
+    <model name="masonry_debris_pile_1">
+      <static>true</static>
+      <pose>3.0 7.0 0.5 0 0 0.2</pose>
+      <link name="debris_link_1">
+        <collision name="debris_col_1">
+          <geometry>
+            <box>
+              <size>2.5 2.5 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="debris_vis_1">
+          <geometry>
+            <box>
+              <size>2.5 2.5 1.0</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.65 0.45 0.35 1</ambient>
+            <diffuse>0.65 0.45 0.35 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Concrete Blocks (Obstacles for UAV Altitude/LiDAR Avoidance) -->
+    <model name="concrete_block_a">
+      <static>true</static>
+      <pose>1.5 3.0 0.4 0 0 0.4</pose>
+      <link name="block_link_a">
+        <collision name="block_col_a">
+          <geometry>
+            <box>
+              <size>1.2 1.2 0.8</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="block_vis_a">
+          <geometry>
+            <box>
+              <size>1.2 1.2 0.8</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.5 0.5 0.5 1</ambient>
+            <diffuse>0.5 0.5 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="concrete_block_b">
+      <static>true</static>
+      <pose>8.0 2.0 0.6 0.1 0 1.1</pose>
+      <link name="block_link_b">
+        <collision name="block_col_b">
+          <geometry>
+            <box>
+              <size>1.5 1.0 1.2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="block_vis_b">
+          <geometry>
+            <box>
+              <size>1.5 1.0 1.2</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.52 0.52 0.52 1</ambient>
+            <diffuse>0.52 0.52 0.52 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Damaged Vertical Retaining Wall Obstacle -->
+    <model name="damaged_retaining_wall">
+      <static>true</static>
+      <pose>0.0 8.0 1.75 0 0 0</pose>
+      <link name="wall_link">
+        <collision name="wall_col">
+          <geometry>
+            <box>
+              <size>8.0 0.4 3.5</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="wall_vis">
+          <geometry>
+            <box>
+              <size>8.0 0.4 3.5</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.58 0.58 0.6 1</ambient>
+            <diffuse>0.58 0.58 0.6 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Survivor Target 1 (High-visibility orange clothing near rubble) -->
+    <model name="survivor_target_1">
+      <static>true</static>
+      <pose>4.2 4.8 0.1 0 0 0.7</pose>
+      <link name="survivor_link_1">
+        <collision name="survivor_col_1">
+          <geometry>
+            <capsule>
+              <radius>0.25</radius>
+              <length>1.6</length>
+            </capsule>
+          </geometry>
+        </collision>
+        <visual name="survivor_vis_1">
+          <geometry>
+            <capsule>
+              <radius>0.25</radius>
+              <length>1.6</length>
+            </capsule>
+          </geometry>
+          <material>
+            <ambient>0.9 0.25 0.1 1</ambient>
+            <diffuse>0.9 0.25 0.1 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Survivor Target 2 (Blue clothing near wall) -->
+    <model name="survivor_target_2">
+      <static>true</static>
+      <pose>-1.5 6.5 0.1 0 0 -0.5</pose>
+      <link name="survivor_link_2">
+        <collision name="survivor_col_2">
+          <geometry>
+            <capsule>
+              <radius>0.25</radius>
+              <length>1.6</length>
+            </capsule>
+          </geometry>
+        </collision>
+        <visual name="survivor_vis_2">
+          <geometry>
+            <capsule>
+              <radius>0.25</radius>
+              <length>1.6</length>
+            </capsule>
+          </geometry>
+          <material>
+            <ambient>0.1 0.4 0.9 1</ambient>
+            <diffuse>0.1 0.4 0.9 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Ambient Scene Settings -->
+    <scene>
+      <ambient>0.6 0.6 0.6 1.0</ambient>
+      <background>0.7 0.8 0.9 1.0</background>
+      <shadows>true</shadows>
+    </scene>
+
+  </world>
+</sdf>

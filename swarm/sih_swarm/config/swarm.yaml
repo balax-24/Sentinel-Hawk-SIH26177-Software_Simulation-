@@ -1,0 +1,6 @@
+sih_swarm:
+  ros__parameters:
+    swarm_id: "sih_swarm_alpha"
+    num_drones: 3
+    spacing_m: 5.0
+    search_area_bounds: [-10.0, 20.0, -10.0, 20.0]

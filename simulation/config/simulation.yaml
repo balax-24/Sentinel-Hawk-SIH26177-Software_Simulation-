@@ -1,0 +1,57 @@
+# SIH26177 Simulation Parameters
+sih_simulation:
+  ros__parameters:
+    world_name: "disaster_world"
+    use_sim_time: true
+    headless: false
+
+    # Drone Physical Properties
+    drone:
+      id: "uav_alpha_1"
+      mass_kg: 1.5
+      arm_length_m: 0.25
+      max_velocity_mps: 5.0
+      initial_pose: [0.0, 0.0, 0.3, 0.0, 0.0, 0.0]
+
+    # Simulated Sensor Frequencies & Noise
+    sensors:
+      lidar:
+        enabled: true
+        topic: "/lidar/points"
+        rate_hz: 10.0
+        horizontal_samples: 512
+        vertical_channels: 16
+        min_range_m: 0.2
+        max_range_m: 50.0
+        noise_stddev_m: 0.01
+
+      rgb_camera:
+        enabled: true
+        topic: "/camera/image"
+        info_topic: "/camera/camera_info"
+        rate_hz: 30.0
+        width: 1280
+        height: 720
+        fov_deg: 62.2
+
+      depth_camera:
+        enabled: true
+        topic: "/camera/depth"
+        rate_hz: 15.0
+        width: 640
+        height: 480
+        min_depth_m: 0.2
+        max_depth_m: 20.0
+
+      gps:
+        enabled: true
+        topic: "/drone/gps/fix"
+        rate_hz: 5.0
+        origin_latitude: 28.613939   # Example disaster coordinate (Delhi)
+        origin_longitude: 77.209021
+        origin_altitude: 216.0
+
+      imu:
+        enabled: true
+        topic: "/drone/imu/data"
+        rate_hz: 100.0
