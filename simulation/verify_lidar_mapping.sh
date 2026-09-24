@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 source /opt/ros/humble/setup.bash
 source /ros2_ws/install/setup.bash
@@ -23,17 +22,17 @@ trap cleanup EXIT
 echo "[1/4] Launching Gazebo Fortress simulation stack..."
 ros2 launch sih_simulation simulation.launch.py gui:=false > /tmp/sim_launch.log 2>&1 &
 SIM_PID=$!
-sleep 6
+sleep 8
 
 echo "[2/4] Launching live LiDAR processor..."
 ros2 launch sih_lidar lidar.launch.py > /tmp/lidar_launch.log 2>&1 &
 LIDAR_PID=$!
-sleep 2
+sleep 3
 
 echo "[3/4] Launching live 3D mapping node..."
 ros2 launch sih_mapping mapping.launch.py > /tmp/mapping_launch.log 2>&1 &
 MAP_PID=$!
-sleep 3
+sleep 4
 
 echo ""
 echo "===================================================================="
@@ -51,7 +50,6 @@ echo ""
 echo "===================================================================="
 echo "CHECK 3: RAW GAZEBO LIDAR TOPIC (/lidar/points)"
 echo "===================================================================="
-ros2 topic info /lidar/points
 ros2 topic echo /lidar/points --once --field header
 ros2 topic echo /lidar/points --once --field width
 
@@ -80,7 +78,7 @@ echo "Initial UAV Pose:"
 ros2 topic echo /drone/pose --once
 
 echo "Publishing velocity command: linear.x = 2.0 m/s..."
-for i in {1..10}; do
+for i in {1..12}; do
     ros2 topic pub --once /drone/cmd_vel geometry_msgs/msg/Twist "{linear: {x: 2.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" > /dev/null 2>&1
     sleep 0.1
 done

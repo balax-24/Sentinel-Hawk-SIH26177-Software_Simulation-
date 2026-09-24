@@ -128,6 +128,27 @@ class LidarProcessor:
         return clusters
 
 
+def decode_pointcloud2_xyz(msg: PointCloud2) -> np.ndarray:
+    """Fast, robust extraction of XYZ coordinates from PointCloud2 with any field layout."""
+    if len(msg.data) == 0 or msg.point_step < 12:
+        return np.empty((0, 3), dtype=np.float32)
+    try:
+        raw = np.frombuffer(msg.data, dtype=np.uint8)
+        pts = raw.reshape(-1, msg.point_step)[:, :12].copy().view(dtype=np.float32)
+        finite_mask = np.isfinite(pts).all(axis=1)
+        return pts[finite_mask]
+    except Exception:
+        try:
+            pts_list = list(pc2.read_points(msg, field_names=["x", "y", "z"], skip_nans=True))
+            if len(pts_list) == 0:
+                return np.empty((0, 3), dtype=np.float32)
+            pts = np.array(pts_list, dtype=np.float32)
+            finite_mask = np.isfinite(pts).all(axis=1)
+            return pts[finite_mask]
+        except Exception:
+            return np.empty((0, 3), dtype=np.float32)
+
+
 class LidarProcessorNode(Node if HAS_ROS2 else object):
     """ROS 2 Node subscribing to /lidar/points and publishing filtered obstacles."""
 
@@ -186,23 +207,12 @@ class LidarProcessorNode(Node if HAS_ROS2 else object):
         if not HAS_ROS2 or pc2 is None:
             return
 
-        # 1. Decode PointCloud2 into NumPy array
-        try:
-            pts = pc2.read_points_numpy(msg, field_names=["x", "y", "z"], skip_nans=True)
-        except Exception as e:
-            self.get_logger().error(f"Failed to decode PointCloud2: {e}")
-            return
-
-        if pts is None or len(pts) == 0:
-            return
-
-        # 2. Filter non-finite (NaN / Inf) coordinates
-        finite_mask = np.isfinite(pts).all(axis=1)
-        pts = pts[finite_mask]
+        # 1. Decode PointCloud2 into finite NumPy array
+        pts = decode_pointcloud2_xyz(msg)
         if len(pts) == 0:
             return
 
-        # 3. Apply core LiDAR processing: range filter, voxel downsampling, ground separation
+        # 2. Apply core LiDAR processing: range filter, voxel downsampling, ground separation
         obstacle_pts, ground_pts = self.processor.filter_points(pts)
 
         # 4. Construct output header

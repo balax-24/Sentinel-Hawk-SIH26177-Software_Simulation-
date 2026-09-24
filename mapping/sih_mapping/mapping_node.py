@@ -140,6 +140,27 @@ class GlobalMapAccumulator:
         return file_path
 
 
+def decode_pointcloud2_xyz(msg: PointCloud2) -> np.ndarray:
+    """Fast, robust extraction of XYZ coordinates from PointCloud2 with any field layout."""
+    if len(msg.data) == 0 or msg.point_step < 12:
+        return np.empty((0, 3), dtype=np.float32)
+    try:
+        raw = np.frombuffer(msg.data, dtype=np.uint8)
+        pts = raw.reshape(-1, msg.point_step)[:, :12].copy().view(dtype=np.float32)
+        finite_mask = np.isfinite(pts).all(axis=1)
+        return pts[finite_mask]
+    except Exception:
+        try:
+            pts_list = list(pc2.read_points(msg, field_names=["x", "y", "z"], skip_nans=True))
+            if len(pts_list) == 0:
+                return np.empty((0, 3), dtype=np.float32)
+            pts = np.array(pts_list, dtype=np.float32)
+            finite_mask = np.isfinite(pts).all(axis=1)
+            return pts[finite_mask]
+        except Exception:
+            return np.empty((0, 3), dtype=np.float32)
+
+
 class MappingNode(Node if HAS_ROS2 else object):
     """ROS 2 Node accumulating 3D map from processed LiDAR data and live UAV pose."""
 
@@ -199,17 +220,7 @@ class MappingNode(Node if HAS_ROS2 else object):
             return
 
         # 1. Decode incoming PointCloud2
-        try:
-            pts = pc2.read_points_numpy(msg, field_names=["x", "y", "z"], skip_nans=True)
-        except Exception as e:
-            self.get_logger().error(f"Failed to decode PointCloud2 in mapping: {e}")
-            return
-
-        if pts is None or len(pts) == 0:
-            return
-
-        finite_mask = np.isfinite(pts).all(axis=1)
-        pts = pts[finite_mask]
+        pts = decode_pointcloud2_xyz(msg)
         if len(pts) == 0:
             return
 
