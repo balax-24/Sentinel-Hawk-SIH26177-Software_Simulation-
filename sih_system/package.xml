@@ -2,11 +2,14 @@
 <package format="3">
   <name>sih_system</name>
   <version>0.1.0</version>
-  <description>Master integration and system mission bringup for SIH26177 Search & Rescue.</description>
+  <description>Master integration and system mission bringup for SIH26177 Search and Rescue.</description>
   <maintainer email="team@sih26177.org">SIH26177 Team</maintainer>
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_python</buildtool_depend>
+
+  <depend>rclpy</depend>
+  <test_depend>pytest</test_depend>
 
   <exec_depend>sih_simulation</exec_depend>
   <exec_depend>sih_lidar</exec_depend>

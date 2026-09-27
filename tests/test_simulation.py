@@ -4,8 +4,12 @@ import math
 import numpy as np
 import pytest
 
-from simulation.simulation.uav_controller import UAVDynamicsSimulator, UAVState
-from simulation.simulation.mock_sim_node import DisasterSceneGenerator
+try:
+    from simulation.simulation.uav_controller import UAVDynamicsSimulator, UAVState
+    from simulation.simulation.mock_sim_node import DisasterSceneGenerator
+except ModuleNotFoundError:
+    from simulation.uav_controller import UAVDynamicsSimulator, UAVState
+    from simulation.mock_sim_node import DisasterSceneGenerator
 
 
 def test_uav_kinematics_and_movement():

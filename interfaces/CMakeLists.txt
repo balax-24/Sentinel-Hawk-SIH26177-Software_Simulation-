@@ -20,6 +20,8 @@ set(msg_files
   "msg/SurvivorArray.msg"
   "msg/PayloadStatus.msg"
   "msg/SwarmState.msg"
+  "msg/Hazard.msg"
+  "msg/HazardArray.msg"
 )
 
 set(srv_files
